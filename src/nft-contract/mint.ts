@@ -5,19 +5,41 @@ import { internalAddTokenToOwner, refundDeposit } from "./internal";
 import { Token, TokenMetadata } from "./metadata";
 
 export function internalMint({
-    contract,
-    tokenId,
-    metadata,
-    receiverId,
-    perpetualRoyalties
-}:{ 
-    contract: Contract, 
-    tokenId: string, 
-    metadata: TokenMetadata, 
-    receiverId: string 
-    perpetualRoyalties: {[key: string]: number}
+  contract,
+  tokenId,
+  metadata,
+  receiverId,
+  perpetualRoyalties,
+}: {
+  contract: Contract;
+  tokenId: string;
+  metadata: TokenMetadata;
+  receiverId: string;
+  perpetualRoyalties: { [key: string]: number };
 }): void {
-    /*
-        FILL THIS IN
-    */
+  // measure the initial storage being used on the contract TODO
+  const initialStorageUsage = near.storageUsage();
+
+  // specify the token struct that contains the owner ID
+  const token = new Token({
+    // set the owner ID equal to the receiver ID passed into the function
+    owner_id: receiverId,
+  });
+
+  // insert the token ID and token struct and make sure that the token doesn't exist
+  assert(!contract.tokensById.containsKey(tokenId), "Token already exists");
+  contract.tokensById.set(tokenId, token);
+
+  // insert the token ID and metadata
+  contract.tokenMetadataById.set(tokenId, metadata);
+
+  // call the internal method for adding the token to the owner
+  internalAddTokenToOwner(contract, receiverId, tokenId);
+
+  // calculate the required storage which was the used - initial TODO
+  const requiredStorageInBytes =
+    near.storageUsage().valueOf() - initialStorageUsage.valueOf();
+
+  // refund any excess storage if the user attached too much. Panic if they didn't attach enough to cover the required/
+  refundDeposit(requiredStorageInBytes);
 }
