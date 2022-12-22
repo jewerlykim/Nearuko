@@ -23,8 +23,12 @@ export function internalMint({
   // specify the token struct that contains the owner ID
   const token = new Token({
     // set the owner ID equal to the receiver ID passed into the function
-    owner_id: receiverId,
+    ownerId: receiverId,
   });
+
+  near.log(
+    `Minting token ${tokenId} to ${token.owner_id}, receiverId: ${receiverId}`
+  );
 
   // insert the token ID and token struct and make sure that the token doesn't exist
   assert(!contract.tokensById.containsKey(tokenId), "Token already exists");

@@ -104,8 +104,8 @@ export class TokenMetadata {
 
 export class Token {
   owner_id: string;
-  constructor({ onwerId }: { onwerId: string }) {
-    this.owner_id = onwerId;
+  constructor({ ownerId }: { ownerId: string }) {
+    this.owner_id = ownerId;
   }
 }
 
