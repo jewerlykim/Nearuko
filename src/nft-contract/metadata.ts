@@ -104,8 +104,24 @@ export class TokenMetadata {
 
 export class Token {
   owner_id: string;
-  constructor({ ownerId }: { ownerId: string }) {
+  approved_account_ids: { [accountId: string]: number };
+  next_approval_id: number;
+
+  constructor({
+    ownerId,
+    approvedAccountIds,
+    nextApprovalId,
+  }: {
+    ownerId: string;
+    approvedAccountIds: { [accountId: string]: number };
+    nextApprovalId: number;
+  }) {
+    //owner of the token
     this.owner_id = ownerId;
+    //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
+    (this.approved_account_ids = approvedAccountIds),
+      //the next approval ID to give out.
+      (this.next_approval_id = nextApprovalId);
   }
 }
 
@@ -114,18 +130,27 @@ export class JsonToken {
   token_id: string;
   owner_id: string;
   metadata: TokenMetadata;
+  approved_account_ids: { [accountId: string]: number };
+
   constructor({
-    token_id,
-    owner_id,
+    tokenId,
+    ownerId,
     metadata,
+    approvedAccountIds,
   }: {
-    token_id: string;
-    owner_id: string;
+    tokenId: string;
+    ownerId: string;
     metadata: TokenMetadata;
+    approvedAccountIds: { [accountId: string]: number };
   }) {
-    this.token_id = token_id;
-    this.owner_id = owner_id;
-    this.metadata = metadata;
+    //token ID
+    (this.token_id = tokenId),
+      //owner of the token
+      (this.owner_id = ownerId),
+      //token metadata
+      (this.metadata = metadata),
+      //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
+      (this.approved_account_ids = approvedAccountIds);
   }
 }
 

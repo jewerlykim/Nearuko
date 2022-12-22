@@ -64,25 +64,58 @@ export function assertOneYocto() {
   );
 }
 
+//Assert that the user has attached at least 1 yoctoNEAR (for security reasons and to pay for storage)
+export function assertAtLeastOneYocto() {
+  assert(
+    near.attachedDeposit().valueOf() >= BigInt(1),
+    "Requires attached deposit of at least 1 yoctoNEAR"
+  );
+}
+
+//calculate how many bytes the account ID is taking up
+export function bytesForApprovedAccountId(accountId: string): number {
+  // The extra 4 bytes are coming from Borsh serialization to store the length of the string.
+  return accountId.length + 4 + 8;
+}
+
 //transfers the NFT to the receiver_id (internal method and can't be called directly via CLI).
 export function internalTransfer(
   contract: Contract,
   senderId: string,
   receiverId: string,
   tokenId: string,
+  approvalId: number,
   memo: string
 ): Token {
   //get the token object by passing in the token_id
-  const token = contract.tokensById.get(tokenId) as Token;
+  let token = contract.tokensById.get(tokenId) as Token;
   if (token == null) {
     near.panic("no token found");
   }
 
-  near.log(`Token is ${token} and owner is ${token.owner_id}`);
-  near.log(`Sender is ${senderId} and receiver is ${receiverId}`);
+  //if the sender doesn't equal the owner, we check if the sender is in the approval list
+  if (senderId != token.owner_id) {
+    //if the token's approved account IDs doesn't contain the sender, we panic
+    if (!token.approved_account_ids.hasOwnProperty(senderId)) {
+      near.panic("Unauthorized");
+    }
 
-  //if the sender doesn't equal the owner, we panic
-  assert(token.owner_id === senderId, " be owned by the sender");
+    // If they included an approval_id, check if the sender's actual approval_id is the same as the one included
+    if (approvalId != null) {
+      //get the actual approval ID
+      let actualApprovalId = token.approved_account_ids[senderId];
+      //if the sender isn't in the map, we panic
+      if (actualApprovalId == null) {
+        near.panic("Sender is not approved account");
+      }
+
+      //make sure that the actual approval ID is the same as the one provided
+      assert(
+        actualApprovalId == approvalId,
+        `The actual approval_id ${actualApprovalId} is different from the given approval_id ${approvalId}`
+      );
+    }
+  }
 
   //we make sure that the sender isn't sending the token to themselves
   assert(
@@ -96,8 +129,11 @@ export function internalTransfer(
   internalAddTokenToOwner(contract, receiverId, tokenId);
 
   //we create a new token struct
-  const newToken = new Token({
+  let newToken = new Token({
     ownerId: receiverId,
+    //reset the approval account IDs
+    approvedAccountIds: {},
+    nextApprovalId: token.next_approval_id,
   });
 
   //insert that new token into the tokens_by_id, replacing the old entry
@@ -137,4 +173,30 @@ export function internalRemoveTokenFromOwner(
     //if the token set is not empty, we simply insert it back for the account ID.
     contract.tokensPerOwner.set(accountId, tokenSet);
   }
+}
+
+//refund the storage taken up by passed in approved account IDs and send the funds to the passed in account ID.
+export function refundApprovedAccountIdsIter(
+  accountId: string,
+  approvedAccountIds: string[]
+) {
+  //get the storage total by going through and summing all the bytes for each approved account IDs
+  let storageReleased = approvedAccountIds
+    .map((e) => bytesForApprovedAccountId(e))
+    .reduce((partialSum, a) => partialSum + a, 0);
+  let amountToTransfer =
+    BigInt(storageReleased) * near.storageByteCost().valueOf();
+
+  // Send the money to the beneficiary (TODO: don't use batch actions)
+  const promise = near.promiseBatchCreate(accountId);
+  near.promiseBatchActionTransfer(promise, amountToTransfer);
+}
+
+//refund a map of approved account IDs and send the funds to the passed in account ID
+export function refundApprovedAccountIds(
+  accountId: string,
+  approvedAccountIds: { [key: string]: number }
+) {
+  //call the refundApprovedAccountIdsIter with the approved account IDs as keys
+  refundApprovedAccountIdsIter(accountId, Object.keys(approvedAccountIds));
 }

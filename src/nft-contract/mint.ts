@@ -24,6 +24,10 @@ export function internalMint({
   const token = new Token({
     // set the owner ID equal to the receiver ID passed into the function
     ownerId: receiverId,
+    //we set the approved account IDs to the default value (an empty map)
+    approvedAccountIds: {},
+    //the next approval ID is set to 0
+    nextApprovalId: 0,
   });
 
   near.log(
