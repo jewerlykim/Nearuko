@@ -249,7 +249,7 @@ export function internalResolveTransfer({
   };
 
   // Log the serialized json.
-  near.log(JSON.stringify(nftTransferLog));
+  near.log(`EVENT_JSON:${JSON.stringify(nftTransferLog)}`);
 
   //return false
   return false;

@@ -179,7 +179,7 @@ export function internalTransfer(
   };
 
   // Log the serialized json.
-  near.log(JSON.stringify(nftTransferLog));
+  near.log(`EVENT_JSON:${JSON.stringify(nftTransferLog)}`);
 
   //return the previous token object that was transferred.
   return token;
