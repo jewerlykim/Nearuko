@@ -134,6 +134,8 @@ export function internalTransfer(
     //reset the approval account IDs
     approvedAccountIds: {},
     nextApprovalId: token.next_approval_id,
+    //we copy over the royalties from the previous token
+    royalty: token.royalty,
   });
 
   //insert that new token into the tokens_by_id, replacing the old entry
@@ -199,4 +201,15 @@ export function refundApprovedAccountIds(
 ) {
   //call the refundApprovedAccountIdsIter with the approved account IDs as keys
   refundApprovedAccountIdsIter(accountId, Object.keys(approvedAccountIds));
+}
+
+//convert the royalty percentage and amount to pay into a payout (U128)
+export function royaltyToPayout(
+  royaltyPercentage: number,
+  amountToPay: bigint
+): string {
+  return (
+    (BigInt(royaltyPercentage) * BigInt(amountToPay)) /
+    BigInt(10000)
+  ).toString();
 }
