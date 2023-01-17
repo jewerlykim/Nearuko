@@ -36,6 +36,8 @@ import {
   internalNftRevokeAll,
 } from "./approval";
 import { internalNftPayout, internalNftTransferPayout } from "./royalty";
+import { internalTransferOwnership, assertOwner } from "./ownable";
+import { internalBurnToken } from "./burnable";
 
 /// This spec can be treated like a version of the standard.
 export const NFT_METADATA_SPEC = "nft-1.0.0";
@@ -60,8 +62,8 @@ export class Contract extends NearContract {
     owner_id,
     metadata = {
       spec: "nft-1.0.0",
-      name: "Jewel NFT Contract first in NEAR",
-      symbol: "JEWNEAR",
+      name: "NEARUKO Official",
+      symbol: "NEARU",
     },
   }) {
     super();
@@ -82,6 +84,7 @@ export class Contract extends NearContract {
     */
   @call
   nft_mint({ token_id, metadata, receiver_id, perpetual_royalties }) {
+    assertOwner({ contract: this });
     return internalMint({
       contract: this,
       tokenId: token_id,
@@ -267,5 +270,26 @@ export class Contract extends NearContract {
   nft_metadata() {
     // return this.metadata;
     return internalNftMetadata({ contract: this });
+  }
+
+  /* 
+      OWNABLE
+  */
+  @call
+  //transfer ownership of the contract to a new account ID
+  nft_transfer_ownership({ new_owner_id }) {
+    return internalTransferOwnership({
+      contract: this,
+      newOwnerId: new_owner_id,
+    });
+  }
+
+  /*
+      BURN
+  */
+  @call
+  //burn a token
+  nft_burn({ token_id }) {
+    return internalNftBurn({ contract: this, tokenId: token_id });
   }
 }
