@@ -9,7 +9,8 @@
     "build:nft": "near-sdk-js build src/nft-contract/index.ts build/nft.wasm",
     "build:market": "near-sdk-js build src/market-contract/index.ts build/market.wasm",
     "test": "ava",
-    "deploy": "yarn build && near deploy --wasmFile build/nft.wasm --accountId $NFT_CONTRACT_ID"
+    "deploy": "yarn build && near deploy --wasmFile build/nft.wasm --accountId $NFT_CONTRACT_ID",
+    "dtest": "yarn build && yarn test"
   },
   "author": "Near Inc <hello@nearprotocol.com>",
   "license": "Apache-2.0",

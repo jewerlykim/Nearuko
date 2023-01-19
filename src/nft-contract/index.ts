@@ -290,6 +290,6 @@ export class Contract extends NearContract {
   @call
   //burn a token
   nft_burn({ token_id }) {
-    return internalNftBurn({ contract: this, tokenId: token_id });
+    return internalBurnToken({ contract: this, tokenId: token_id });
   }
 }

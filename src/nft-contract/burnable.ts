@@ -3,8 +3,15 @@ import { assert, near, UnorderedSet } from "near-sdk-js";
 import { Token } from "./metadata";
 import { restoreOwners, internalRemoveTokenFromOwner } from "./internal";
 
-export function internalBurnToken(contract: Contract, tokenId: string) {
+export function internalBurnToken({
+  contract,
+  tokenId,
+}: {
+  contract: Contract;
+  tokenId: string;
+}) {
   // get the token from the token ID
+
   let token = contract.tokensById.get(tokenId) as Token;
   if (token == null) {
     near.panic("no token");
