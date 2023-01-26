@@ -10,9 +10,11 @@
     "build:market": "near-sdk-js build src/market-contract/index.ts build/market.wasm",
     "test": "ava",
     "deploy": "yarn build && near deploy --wasmFile build/nft.wasm --accountId $NFT_CONTRACT_ID",
-    "dtest": "yarn build && yarn test"
+    "dtest": "yarn build && yarn test",
+    "build:nearuko": "near-sdk-js build src/nft-contract/nearuko.ts build/nearuko.wasm",
+    "ndeploy": "yarn build:nearuko && near deploy --wasmFile build/nearuko.wasm --accountId $NEARUKO"
   },
-  "author": "Near Inc <hello@nearprotocol.com>",
+  "author": "JewelryKim - BlockNuker",
   "license": "Apache-2.0",
   "dependencies": {
     "ava": "^5.1.1",

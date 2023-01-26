@@ -45,7 +45,7 @@ export const NFT_METADATA_SPEC = "nft-1.0.0";
 /// This is the name of the NFT standard we're using
 export const NFT_STANDARD_NAME = "nep171";
 
-@NearBindgen
+// @NearBindgen
 export class Contract extends NearContract {
   owner_id: string;
   tokensPerOwner: LookupMap;
@@ -268,7 +268,6 @@ export class Contract extends NearContract {
   @view
   //Query for all the tokens for an owner
   nft_metadata() {
-    // return this.metadata;
     return internalNftMetadata({ contract: this });
   }
 
